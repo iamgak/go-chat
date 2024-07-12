@@ -1,0 +1,70 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <div>
+      <h1>Go websockets Chat Application</h1>
+
+      <input id="input" type="text" size="40" />
+      <button onclick="send()">Send</button>
+      <pre id="output"></pre>
+    </div>
+    <style>
+      html {
+        text-align: center;
+        font-size: 16px;
+      }
+      div {
+        padding: 1rem;
+      }
+      #input {
+        font-size: 16px;
+      }
+      p {
+          font-size: 16px;
+      }
+    </style>
+    <script>
+      var input = document.getElementById("input");
+      var output = document.getElementById("output");
+      var socket = new WebSocket("ws://localhost:8080/ws");
+
+socket.onopen = function () {
+  output.innerHTML += "Status: Connected\n";
+};
+
+socket.onclose = function () {
+  output.innerHTML += "Status: DisConnected\n";
+};
+console.log("hello")
+
+socket.onmessage = function (e) {
+  const data = JSON.parse(e.data);
+  if (data.type == "file") {
+  console.log("hello")
+    const blob = new Blob([data.message], {type: 'image/jpeg'});
+    const url = URL.createObjectURL(blob);
+    const img = document.createElement('img');
+    img.src = url;
+    document.body.appendChild(img);
+  } else {
+    console.log(data)
+    output.innerHTML += `<div><strong>Server:</strong> ${data.message} <em>(${data.type})</em></div>`;
+  }};
+
+function send() {
+  const message = {
+    data: input.value,
+    type: "text"
+  };
+  socket.send(JSON.stringify(message));
+  input.value = "";
+}
+
+    </script>
+</body>
+</html>
